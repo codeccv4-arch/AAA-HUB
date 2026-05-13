@@ -1,5 +1,3 @@
--- AAA HUB EXECUTOR VERSION
-
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
@@ -9,32 +7,101 @@ local player = Players.LocalPlayer
 local BASE = "https://raw.githubusercontent.com/codeccv4-arch/AAA-HUB/refs/heads/main/Modules/"
 local LIST = "https://github.com/codeccv4-arch/AAA-HUB/blob/main/modules.json"
 
+-- 📦 cache กันโหลดซ้ำ
+local cache = {}
+
 -- 📥 โหลด module list
 local function getModules()
-	local data = game:HttpGet(LIST)
-	return HttpService:JSONDecode(data).modules
-end
+	local ok, res = pcall(function()
+		return game:HttpGet(LIST)
+	end)
 
--- 📦 โหลด module
-local function loadModule(name)
-	local url = BASE .. name .. ".lua"
+	if not ok then
+		warn("❌ Failed to load modules.json")
+		return {}
+	end
 
-	local success, err = pcall(function()
-		local code = game:HttpGet(url)
-		local func = loadstring(code)
-
-		if func then
-			local module = func()
-			if module.Init then
-				module.Init(player)
-			end
-		end
+	local success, data = pcall(function()
+		return HttpService:JSONDecode(res)
 	end)
 
 	if not success then
-		warn("Module failed:", name)
+		warn("❌ JSON error")
+		return {}
+	end
+
+	return data.modules or {}
+end
+
+-- ⚡ โหลด module เดี่ยว (safe)
+local function loadModule(name)
+	if cache[name] then
+		print("♻ Cached:", name)
+		return
+	end
+
+	cache[name] = true
+
+	task.spawn(function()
+		local url = BASE .. name .. ".lua"
+
+		local success, err = pcall(function()
+			local code = game:HttpGet(url)
+
+			local func = loadstring(code)
+			if not func then
+				warn("❌ loadstring fail:", name)
+				return
+			end
+
+			local module = func()
+
+			if type(module) ~= "table" then
+				warn("❌ invalid module:", name)
+				return
+			end
+
+			-- 🚀 SAFE EXECUTE
+			if module.Init then
+				local ok, moduleErr = pcall(function()
+					module.Init(player)
+				end)
+
+				if not ok then
+					warn("❌ module crash:", name, moduleErr)
+				else
+					print("✅ Loaded:", name)
+				end
+			else
+				warn("⚠ No Init:", name)
+			end
+		end)
+
+		if not success then
+			warn("❌ failed download:", name, err)
+		end
+	end)
+end
+
+-- 🚀 MAIN LOADER (FAST PARALLEL)
+local function Start()
+	local modules = getModules()
+
+	if #modules == 0 then
+		warn("⚠ No modules found")
+		return
+	end
+
+	print("🚀 Loading modules:", #modules)
+
+	for _, name in ipairs(modules) do
+		loadModule(name)
 	end
 end
+
+return {
+	Start = Start
+}
 
 --// AAA NEON HUB FINAL FIXED VERSION
 --// No button lag + Smooth UI + Rainbow border + Blur + Drag
