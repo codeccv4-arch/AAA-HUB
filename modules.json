@@ -2,5 +2,6 @@
   "modules": [
     "Speed",
     "Teleport"
+    "ui"
   ]
 }
