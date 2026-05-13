@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 
 -- 🔗 GitHub
 local BASE = "https://raw.githubusercontent.com/codeccv4-arch/AAA-HUB/refs/heads/main/Modules/"
-local LIST = "https://raw.githubusercontent.com/USERNAME/AAA-HUB/main/modules.json"
+local LIST = "https://raw.githubusercontent.com/codeccv4-arch/AAA-HUB/refs/heads/main/modules.json"
 
 -- 📥 โหลด module list
 local function getModules()
