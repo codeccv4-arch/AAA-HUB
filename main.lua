@@ -36,29 +36,6 @@ local function loadModule(name)
 	end
 end
 
--- 🎮 UI (สร้างผ่าน executor)
-local gui = Instance.new("ScreenGui")
-gui.Parent = game.CoreGui
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,300,0,200)
-frame.Position = UDim2.new(0.5,-150,0.5,-100)
-frame.Parent = gui
-
-local btn = Instance.new("TextButton")
-btn.Size = UDim2.new(0,200,0,50)
-btn.Position = UDim2.new(0.5,-100,0.5,-25)
-btn.Text = "LOAD HUB"
-btn.Parent = frame
-
--- 🚀 CLICK LOAD
-btn.MouseButton1Click:Connect(function()
-	local modules = getModules()
-
-	for _, name in ipairs(modules) do
-		loadModule(name)
-	end
-end)
 --// AAA NEON HUB FINAL FIXED VERSION
 --// No button lag + Smooth UI + Rainbow border + Blur + Drag
 
